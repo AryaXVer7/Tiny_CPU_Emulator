@@ -4,7 +4,19 @@ A beginner-friendly CPU emulator written in C.
 
 This project is part of my low-level programming and computer architecture learning journey. The goal is to understand how CPUs execute instructions by building a small emulator from scratch.
 
-Current Version: **v1**
+**Current Version: v1.5**
+
+---
+
+## What's New in v1.5
+
+### Added Features
+
+* Expanded register count from **2 to 4**
+* Added **SUB** instruction
+* Improved arithmetic instruction handling
+* More complex example programs
+* Better foundation for future memory and stack support
 
 ---
 
@@ -12,21 +24,28 @@ Current Version: **v1**
 
 ### CPU Components
 
-* 2 General Purpose Registers
+* 4 General Purpose Registers
 
   * R0
   * R1
+  * R2
+  * R3
+
 * Program Counter (PC)
+
 * Running State Flag
 
-### Supported Instructions
+---
 
-| Opcode | Instruction | Description                    |
-| ------ | ----------- | ------------------------------ |
-| 0      | LOAD        | Load a value into a register   |
-| 1      | ADD         | Add one register to another    |
-| 2      | HALT        | Stop execution                 |
-| 3      | JMP         | Jump to another memory address |
+## Supported Instructions
+
+| Opcode | Instruction | Description                     |
+| ------ | ----------- | ------------------------------- |
+| 0      | LOAD        | Load a value into a register    |
+| 1      | ADD         | Add multiple registers together |
+| 2      | HALT        | Stop execution                  |
+| 3      | SUB         | Subtract register values        |
+| 4      | JMP         | Jump to another memory address  |
 
 ---
 
@@ -37,6 +56,8 @@ Registers
 ─────────────
 R0
 R1
+R2
+R3
 
 Control Unit
 ─────────────
@@ -76,19 +97,39 @@ R0 = 5
 ### ADD
 
 ```text
-1 DEST SRC
+1 DEST SRC1 SRC2 SRC3
 ```
 
 Example:
 
 ```text
-1 0 1
+1 3 0 1 2
 ```
 
 Meaning:
 
 ```text
-R0 = R0 + R1
+R3 = R3 + R0 + R1 + R2
+```
+
+---
+
+### SUB
+
+```text
+3 DEST SRC1 SRC2 SRC3
+```
+
+Example:
+
+```text
+3 3 0 1 2
+```
+
+Meaning:
+
+```text
+R3 = R3 - R2 - R1 - R0
 ```
 
 ---
@@ -96,19 +137,19 @@ R0 = R0 + R1
 ### JMP
 
 ```text
-3 ADDRESS
+4 ADDRESS
 ```
 
 Example:
 
 ```text
-3 6
+4 12
 ```
 
 Meaning:
 
 ```text
-PC = 6
+PC = 12
 ```
 
 ---
@@ -133,8 +174,14 @@ Stop CPU execution
 int program[] = {
     0, 0, 5,
     0, 1, 7,
-    1, 0, 1,
-    3, 6,
+    0, 2, 9,
+    0, 3, 0,
+
+    1, 3, 0, 1, 2,
+    3, 3, 0, 1, 2,
+
+    4, 12,
+
     2
 };
 ```
@@ -144,16 +191,20 @@ Program Flow:
 ```text
 LOAD R0, 5
 LOAD R1, 7
-ADD R0, R1
-JMP 6
+LOAD R2, 9
+LOAD R3, 0
+
+ADD R3, R0, R1, R2
+SUB R3, R0, R1, R2
+
+JMP 12
+
 HALT
 ```
 
 ---
 
 ## Execution Cycle
-
-The emulator follows a basic CPU execution cycle:
 
 ```text
 Fetch Instruction
@@ -175,7 +226,7 @@ Repeat
 
 ## Building
 
-Compile using GCC:
+Compile:
 
 ```bash
 gcc tiny_cpu_emulator.c -o cpu
@@ -189,19 +240,6 @@ Run:
 
 ---
 
-## Sample Output
-
-```text
-CPU created!
-
-R0     : 26
-R1     : 7
-PC     : 6
-Running: 0
-```
-
----
-
 ## Learning Objectives
 
 This project is being built to learn:
@@ -210,9 +248,31 @@ This project is being built to learn:
 * CPU Design Fundamentals
 * Instruction Sets
 * Program Counters
+* Arithmetic Instructions
 * Fetch-Decode-Execute Cycles
 * Low-Level Programming in C
 * Emulator Development
+
+---
+
+## Version History
+
+### v1
+
+* 2 Registers (R0, R1)
+* LOAD Instruction
+* ADD Instruction
+* JMP Instruction
+* HALT Instruction
+* Basic Fetch-Decode-Execute Cycle
+
+### v1.5
+
+* 4 Registers (R0-R3)
+* SUB Instruction
+* Improved ADD Instruction
+* Larger Example Programs
+* Enhanced CPU Architecture
 
 ---
 

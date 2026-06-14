@@ -1,7 +1,7 @@
 #include<stdio.h>
 
 typedef struct {
-    int regs[2];
+    int regs[4];
     int pc;
     int running;
 } CPU;
@@ -12,6 +12,8 @@ int main(){
 
     cpu.regs[0] = 0;
     cpu.regs[1] = 0;
+    cpu.regs[2] = 0;
+    cpu.regs[3] = 0;
 
     cpu.pc = 0;
 
@@ -20,11 +22,14 @@ int main(){
     printf("CPU created!\n");
 
     int program[] = {
-        0, 0, 5,//register 1
-        0, 1, 7,//register 2
-        1, 0, 1,//ADD
-        3, 6,//JUMP or JMP using pc.
-        2//HALT
+        0, 0, 5,
+        0, 1, 7,
+        0, 2, 9,
+        0, 3, 0,
+        1, 3, 0, 1, 2,
+        3, 3, 0, 1, 2,
+        4, 12,
+        2
     };
 
     int cycles = 0;
@@ -43,14 +48,27 @@ int main(){
 
         else if (instruction == 1){
             int dest = program[cpu.pc + 1];
-            int src = program[cpu.pc + 2];
+            int src1 = program[cpu.pc + 2];
+            int src2 = program[cpu.pc + 3];
+            int src3 = program[cpu.pc + 4];
 
-            cpu.regs[dest] = cpu.regs[dest] + cpu.regs[src];
+            cpu.regs[dest] += cpu.regs[src1] + cpu.regs[src2] + cpu.regs[src3];
 
-            cpu.pc += 3;
+            cpu.pc += 5;
         }
 
         else if (instruction == 3){
+            int dest = program[cpu.pc + 1];
+            int src1 = program[cpu.pc + 2];
+            int src2 = program[cpu.pc + 3];
+            int src3 = program[cpu.pc + 4];
+
+            cpu.regs[dest] -= cpu.regs[src3] - cpu.regs[src2] - cpu.regs[src1];
+
+            cpu.pc += 5;
+        }
+
+        else if (instruction == 4){
 
             int address = program[cpu.pc + 1];
             cpu.pc = address;
@@ -67,11 +85,12 @@ int main(){
     
     }
 
-    printf("R0     : %d\n", cpu.regs[0]);
-    printf("R1     : %d\n", cpu.regs[1]);
-    printf("PC     : %d\n", cpu.pc);
-    printf("Running: %d", cpu.running);
+	printf("R0     : %d\n", cpu.regs[0]);
+	printf("R1     : %d\n", cpu.regs[1]);
+	printf("R2     : %d\n", cpu.regs[2]);
+	printf("R3     : %d\n", cpu.regs[3]);
+	printf("PC     : %d\n", cpu.pc);
+	printf("Running: %d\n", cpu.running);
 
-    printf("\n");
     return 0;
 }
