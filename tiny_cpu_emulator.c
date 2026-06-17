@@ -4,6 +4,7 @@ typedef struct {
     int regs[4];
     int pc;
     int running;
+    int zero_flag;
 } CPU;
 
 int main(){
@@ -19,6 +20,8 @@ int main(){
 
     cpu.running = 1;
 
+    cpu.zero_flag = 0;
+
     printf("CPU created!\n");
 
     int program[] = {
@@ -28,6 +31,8 @@ int main(){
         0, 3, 0,
         1, 3, 0, 1, 2,
         3, 3, 0, 1, 2,
+        5, 0, 1,
+        6, 29,
         4, 12,
         2
     };
@@ -35,6 +40,13 @@ int main(){
     int cycles = 0;
 
     while(cpu.running == 1){
+         
+        cycles++;
+        if (cycles > 30){ //30 Instruction Cycles limit.
+            printf("Cycles Limit Reached!\n");
+            cpu.running = 0;
+        }
+
         int instruction = program[cpu.pc];
         
         if (instruction == 0){
@@ -69,13 +81,30 @@ int main(){
         }
 
         else if (instruction == 4){
-
             int address = program[cpu.pc + 1];
             cpu.pc = address;
-            
-            cycles++;
-            if (cycles > 2){
-                cpu.running = 0;
+        }
+
+        else if (instruction == 5){
+            int src1 = program[cpu.pc + 1];
+            int src2 = program[cpu.pc + 2];
+
+            if (cpu.regs[src1] == cpu.regs[src2]){
+                cpu.zero_flag = 1;
+            }
+            else{
+                cpu.zero_flag = 0;
+            }
+        }
+
+        else if (instruction == 6){
+            int address = program[cpu.pc + 1];
+
+            if (cpu.zero_flag == 1){
+                cpu.pc = address;
+            }
+            else{
+                cpu.pc += 2;
             }
         }
 

@@ -4,19 +4,20 @@ A beginner-friendly CPU emulator written in C.
 
 This project is part of my low-level programming and computer architecture learning journey. The goal is to understand how CPUs execute instructions by building a small emulator from scratch.
 
-**Current Version: v1.5**
+**Current Version: v2**
 
 ---
 
-## What's New in v1.5
+## What's New in v2
 
 ### Added Features
 
-* Expanded register count from **2 to 4**
-* Added **SUB** instruction
-* Improved arithmetic instruction handling
-* More complex example programs
-* Better foundation for future memory and stack support
+* Zero Flag support
+* CMP instruction
+* JZ (Jump if Zero) instruction
+* Conditional branching
+* Cycle limit protection
+* Improved CPU execution flow
 
 ---
 
@@ -33,19 +34,23 @@ This project is part of my low-level programming and computer architecture learn
 
 * Program Counter (PC)
 
-* Running State Flag
+* Running Flag
+
+* Zero Flag
 
 ---
 
 ## Supported Instructions
 
-| Opcode | Instruction | Description                     |
-| ------ | ----------- | ------------------------------- |
-| 0      | LOAD        | Load a value into a register    |
-| 1      | ADD         | Add multiple registers together |
-| 2      | HALT        | Stop execution                  |
-| 3      | SUB         | Subtract register values        |
-| 4      | JMP         | Jump to another memory address  |
+| Opcode | Instruction | Description                  |
+| ------ | ----------- | ---------------------------- |
+| 0      | LOAD        | Load a value into a register |
+| 1      | ADD         | Add multiple registers       |
+| 2      | HALT        | Stop execution               |
+| 3      | SUB         | Subtract register values     |
+| 4      | JMP         | Unconditional jump           |
+| 5      | CMP         | Compare two registers        |
+| 6      | JZ          | Jump if Zero Flag is set     |
 
 ---
 
@@ -58,6 +63,10 @@ R0
 R1
 R2
 R3
+
+Flags
+─────────────
+ZF (Zero Flag)
 
 Control Unit
 ─────────────
@@ -134,6 +143,53 @@ R3 = R3 - R2 - R1 - R0
 
 ---
 
+### CMP
+
+```text
+5 SRC1 SRC2
+```
+
+Example:
+
+```text
+5 0 1
+```
+
+Meaning:
+
+```text
+Compare R0 and R1
+
+If equal:
+    ZF = 1
+
+Else:
+    ZF = 0
+```
+
+---
+
+### JZ
+
+```text
+6 ADDRESS
+```
+
+Example:
+
+```text
+6 29
+```
+
+Meaning:
+
+```text
+If ZF == 1
+    PC = 29
+```
+
+---
+
 ### JMP
 
 ```text
@@ -170,24 +226,6 @@ Stop CPU execution
 
 ## Example Program
 
-```c
-int program[] = {
-    0, 0, 5,
-    0, 1, 7,
-    0, 2, 9,
-    0, 3, 0,
-
-    1, 3, 0, 1, 2,
-    3, 3, 0, 1, 2,
-
-    4, 12,
-
-    2
-};
-```
-
-Program Flow:
-
 ```text
 LOAD R0, 5
 LOAD R1, 7
@@ -197,6 +235,9 @@ LOAD R3, 0
 ADD R3, R0, R1, R2
 SUB R3, R0, R1, R2
 
+CMP R0, R1
+JZ 29
+
 JMP 12
 
 HALT
@@ -204,39 +245,39 @@ HALT
 
 ---
 
-## Execution Cycle
+## New Concepts Introduced
+
+### Flags
+
+The emulator now supports CPU flags.
+
+Currently implemented:
 
 ```text
-Fetch Instruction
-        │
-        ▼
-Decode Instruction
-        │
-        ▼
-Execute Instruction
-        │
-        ▼
-Update Program Counter
-        │
-        ▼
-Repeat
+Zero Flag (ZF)
 ```
+
+Used to determine whether two values are equal after a comparison.
 
 ---
 
-## Building
+### Conditional Branching
 
-Compile:
+The emulator can now change execution flow based on CPU state.
 
-```bash
-gcc tiny_cpu_emulator.c -o cpu
+Example:
+
+```text
+CMP R0, R1
+JZ target
 ```
 
-Run:
+This is the foundation for:
 
-```bash
-./cpu
-```
+* if statements
+* loops
+* function calls
+* real CPU control flow
 
 ---
 
@@ -247,8 +288,9 @@ This project is being built to learn:
 * Computer Architecture
 * CPU Design Fundamentals
 * Instruction Sets
+* CPU Flags
+* Conditional Branching
 * Program Counters
-* Arithmetic Instructions
 * Fetch-Decode-Execute Cycles
 * Low-Level Programming in C
 * Emulator Development
@@ -259,20 +301,25 @@ This project is being built to learn:
 
 ### v1
 
-* 2 Registers (R0, R1)
-* LOAD Instruction
-* ADD Instruction
-* JMP Instruction
-* HALT Instruction
-* Basic Fetch-Decode-Execute Cycle
+* 2 Registers
+* LOAD
+* ADD
+* JMP
+* HALT
 
 ### v1.5
 
-* 4 Registers (R0-R3)
+* 4 Registers
 * SUB Instruction
-* Improved ADD Instruction
-* Larger Example Programs
-* Enhanced CPU Architecture
+* Expanded Arithmetic Support
+
+### v2
+
+* Zero Flag
+* CMP Instruction
+* JZ Instruction
+* Conditional Branching
+* Cycle Limit Protection
 
 ---
 
