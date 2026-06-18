@@ -4,20 +4,20 @@ A beginner-friendly CPU emulator written in C.
 
 This project is part of my low-level programming and computer architecture learning journey. The goal is to understand how CPUs execute instructions by building a small emulator from scratch.
 
-**Current Version: v2**
+**Current Version: v3**
 
 ---
 
-## What's New in v2
+## What's New in v3
 
-### Added Features
+### New Features
 
-* Zero Flag support
-* CMP instruction
-* JZ (Jump if Zero) instruction
-* Conditional branching
-* Cycle limit protection
-* Improved CPU execution flow
+* Added 256 memory cells
+* Added STORE instruction
+* Added LOADM instruction
+* Register-to-memory transfers
+* Memory-to-register transfers
+* Expanded CPU architecture with RAM support
 
 ---
 
@@ -25,63 +25,69 @@ This project is part of my low-level programming and computer architecture learn
 
 ### CPU Components
 
-* 4 General Purpose Registers
+#### Registers
 
-  * R0
-  * R1
-  * R2
-  * R3
+* R0
+* R1
+* R2
+* R3
+
+#### Control Unit
 
 * Program Counter (PC)
-
 * Running Flag
+* Zero Flag (ZF)
 
-* Zero Flag
+#### Memory
+
+```text
+256 Memory Cells
+```
+
+Used to store data outside CPU registers.
 
 ---
 
 ## Supported Instructions
 
-| Opcode | Instruction | Description                  |
-| ------ | ----------- | ---------------------------- |
-| 0      | LOAD        | Load a value into a register |
-| 1      | ADD         | Add multiple registers       |
-| 2      | HALT        | Stop execution               |
-| 3      | SUB         | Subtract register values     |
-| 4      | JMP         | Unconditional jump           |
-| 5      | CMP         | Compare two registers        |
-| 6      | JZ          | Jump if Zero Flag is set     |
+| Opcode | Instruction | Description                          |
+| ------ | ----------- | ------------------------------------ |
+| 0      | LOAD        | Load immediate value into register   |
+| 1      | ADD         | Add values from multiple registers   |
+| 2      | HALT        | Stop execution                       |
+| 3      | SUB         | Subtract register values             |
+| 4      | JMP         | Unconditional jump                   |
+| 5      | CMP         | Compare two registers                |
+| 6      | JZ          | Jump if Zero Flag is set             |
+| 7      | STORE       | Store register value in memory       |
+| 8      | LOADM       | Load value from memory into register |
 
 ---
 
 ## CPU Architecture
 
 ```text
-Registers
-─────────────
-R0
-R1
-R2
-R3
+                ┌─────────────┐
+                │   MEMORY    │
+                │ 256 CELLS   │
+                └──────┬──────┘
+                       │
+                       ▼
 
-Flags
-─────────────
-ZF (Zero Flag)
-
-Control Unit
-─────────────
-PC (Program Counter)
-
-Execution Loop
-─────────────
-Fetch
-Decode
-Execute
+┌─────────────────────────────┐
+│         CPU CORE            │
+├─────────────────────────────┤
+│ R0 │ R1 │ R2 │ R3           │
+├─────────────────────────────┤
+│ PC (Program Counter)        │
+│ ZF (Zero Flag)              │
+│ Running Flag                │
+└─────────────────────────────┘
 ```
 
 ---
 
-## Instruction Format
+## Instruction Set
 
 ### LOAD
 
@@ -162,7 +168,6 @@ Compare R0 and R1
 
 If equal:
     ZF = 1
-
 Else:
     ZF = 0
 ```
@@ -185,7 +190,7 @@ Meaning:
 
 ```text
 If ZF == 1
-    PC = 29
+    PC = ADDRESS
 ```
 
 ---
@@ -205,7 +210,55 @@ Example:
 Meaning:
 
 ```text
-PC = 12
+PC = ADDRESS
+```
+
+---
+
+### STORE
+
+Store a register value into memory.
+
+Format:
+
+```text
+7 SRC MEMORY_ADDRESS
+```
+
+Example:
+
+```text
+7 1 0
+```
+
+Meaning:
+
+```text
+MEMORY[0] = R1
+```
+
+---
+
+### LOADM
+
+Load a value from memory into a register.
+
+Format:
+
+```text
+8 DEST MEMORY_ADDRESS
+```
+
+Example:
+
+```text
+8 2 0
+```
+
+Meaning:
+
+```text
+R2 = MEMORY[0]
 ```
 
 ---
@@ -226,58 +279,80 @@ Stop CPU execution
 
 ## Example Program
 
-```text
-LOAD R0, 5
-LOAD R1, 7
-LOAD R2, 9
-LOAD R3, 0
+```c
+int program[] = {
+    0, 0, 5,
+    0, 1, 7,
+    0, 2, 9,
+    0, 3, 0,
 
-ADD R3, R0, R1, R2
-SUB R3, R0, R1, R2
+    1, 3, 0, 1, 2,
+    3, 3, 0, 1, 2,
 
-CMP R0, R1
-JZ 29
+    5, 0, 1,
+    6, 29,
 
-JMP 12
+    7, 1, 0,
+    8, 2, 0,
 
-HALT
+    4, 12,
+
+    2
+};
 ```
 
 ---
 
-## New Concepts Introduced
+## Execution Cycle
 
-### Flags
-
-The emulator now supports CPU flags.
-
-Currently implemented:
+The emulator follows a classic CPU execution cycle:
 
 ```text
-Zero Flag (ZF)
+Fetch Instruction
+        │
+        ▼
+Decode Instruction
+        │
+        ▼
+Execute Instruction
+        │
+        ▼
+Update Program Counter
+        │
+        ▼
+Repeat
 ```
-
-Used to determine whether two values are equal after a comparison.
 
 ---
 
-### Conditional Branching
+## Building
 
-The emulator can now change execution flow based on CPU state.
+Compile:
 
-Example:
-
-```text
-CMP R0, R1
-JZ target
+```bash
+gcc tiny_cpu_emulator.c -o cpu
 ```
 
-This is the foundation for:
+Run:
 
-* if statements
-* loops
-* function calls
-* real CPU control flow
+```bash
+./cpu
+```
+
+---
+
+## Sample Output
+
+```text
+CPU Created!
+
+R0     : 5
+R1     : 7
+R2     : 7
+R3     : 14
+PC     : 12
+Running: 0
+```
 
 ---
 
@@ -287,13 +362,13 @@ This project is being built to learn:
 
 * Computer Architecture
 * CPU Design Fundamentals
-* Instruction Sets
+* Memory Systems
 * CPU Flags
+* Instruction Sets
 * Conditional Branching
-* Program Counters
 * Fetch-Decode-Execute Cycles
-* Low-Level Programming in C
 * Emulator Development
+* Low-Level Programming in C
 
 ---
 
@@ -311,7 +386,7 @@ This project is being built to learn:
 
 * 4 Registers
 * SUB Instruction
-* Expanded Arithmetic Support
+* Improved Arithmetic Support
 
 ### v2
 
@@ -319,7 +394,14 @@ This project is being built to learn:
 * CMP Instruction
 * JZ Instruction
 * Conditional Branching
-* Cycle Limit Protection
+
+### v3
+
+* 256 Memory Cells
+* STORE Instruction
+* LOADM Instruction
+* Register ↔ Memory Transfers
+* Basic RAM Support
 
 ---
 
@@ -333,3 +415,10 @@ Interested in:
 * Systems Programming
 * Compiler Design
 * Computer Architecture
+* Emulator Development
+
+---
+
+## License
+
+MIT License

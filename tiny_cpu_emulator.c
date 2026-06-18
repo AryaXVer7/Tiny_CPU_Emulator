@@ -5,6 +5,7 @@ typedef struct {
     int pc;
     int running;
     int zero_flag;
+    int memory[256];
 } CPU;
 
 int main(){
@@ -22,6 +23,10 @@ int main(){
 
     cpu.zero_flag = 0;
 
+    for (int i = 0; i < sizeof(cpu.memory) / sizeof(cpu.memory[0]); i++){
+        cpu.memory[i] = 0;
+    }
+
     printf("CPU created!\n");
 
     int program[] = {
@@ -33,6 +38,8 @@ int main(){
         3, 3, 0, 1, 2,
         5, 0, 1,
         6, 29,
+        7, 1, 0,
+        8, 2, 0,
         4, 12,
         2
     };
@@ -106,6 +113,24 @@ int main(){
             else{
                 cpu.pc += 2;
             }
+        }
+
+        else if (instruction == 7){
+            int src = program[cpu.pc + 1];
+            int memory_address = program[cpu.pc + 2];
+
+            cpu.memory[memory_address] = cpu.regs[src];
+
+            cpu.pc += 3;
+        }
+
+        else if (instruction == 8){
+            int dest = program[cpu.pc + 1];
+            int memory_address = program[cpu.pc + 2];
+
+            cpu.regs[dest] = cpu.memory[memory_address];
+
+            cpu.pc += 3;
         }
 
         else if (instruction == 2){
