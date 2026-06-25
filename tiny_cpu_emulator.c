@@ -102,6 +102,8 @@ int main(){
             else{
                 cpu.zero_flag = 0;
             }
+			
+			cpu.pc += 3;
         }
 
         else if (instruction == 6){
