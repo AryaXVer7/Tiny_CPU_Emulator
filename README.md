@@ -4,73 +4,71 @@ A beginner-friendly CPU emulator written in C.
 
 This project is part of my low-level programming and computer architecture learning journey. The goal is to understand how CPUs execute instructions by building a small emulator from scratch.
 
-**Current Version: v3**
+**Current Version: v4**
 
 ---
 
-## What's New in v3
+# What's New in v4
 
-### New Features
+## New Features
 
-* Added 256 memory cells
-* Added STORE instruction
-* Added LOADM instruction
-* Register-to-memory transfers
-* Memory-to-register transfers
-* Expanded CPU architecture with RAM support
+* File-based program loading
+* User-entered machine code
+* Instructions stored in `instructions.txt`
+* Program loading from external files
+* Separation between CPU and programs
 
 ---
 
-## Features
+# Features
 
-### CPU Components
+## CPU Components
 
-#### Registers
+### Registers
 
 * R0
 * R1
 * R2
 * R3
 
-#### Control Unit
+### Flags
+
+* Zero Flag (ZF)
+
+### Control Unit
 
 * Program Counter (PC)
 * Running Flag
-* Zero Flag (ZF)
 
-#### Memory
+### Memory
 
-```text
-256 Memory Cells
-```
-
-Used to store data outside CPU registers.
+* 256 memory cells
 
 ---
 
-## Supported Instructions
+# Supported Instructions
 
-| Opcode | Instruction | Description                          |
-| ------ | ----------- | ------------------------------------ |
-| 0      | LOAD        | Load immediate value into register   |
-| 1      | ADD         | Add values from multiple registers   |
-| 2      | HALT        | Stop execution                       |
-| 3      | SUB         | Subtract register values             |
-| 4      | JMP         | Unconditional jump                   |
-| 5      | CMP         | Compare two registers                |
-| 6      | JZ          | Jump if Zero Flag is set             |
-| 7      | STORE       | Store register value in memory       |
-| 8      | LOADM       | Load value from memory into register |
+| Opcode | Instruction | Description                    |
+| ------ | ----------- | ------------------------------ |
+| 0      | LOAD        | Load value into register       |
+| 1      | ADD         | Add registers                  |
+| 2      | HALT        | Stop execution                 |
+| 3      | SUB         | Subtract registers             |
+| 4      | JMP         | Unconditional jump             |
+| 5      | CMP         | Compare registers              |
+| 6      | JZ          | Jump if Zero Flag is set       |
+| 7      | STORE       | Store register value in memory |
+| 8      | LOADM       | Load value from memory         |
 
 ---
 
-## CPU Architecture
+# CPU Architecture
 
 ```text
-                ┌─────────────┐
-                │   MEMORY    │
-                │ 256 CELLS   │
-                └──────┬──────┘
+                ┌──────────────┐
+                │ instructions │
+                │    .txt      │
+                └──────┬───────┘
                        │
                        ▼
 
@@ -79,253 +77,85 @@ Used to store data outside CPU registers.
 ├─────────────────────────────┤
 │ R0 │ R1 │ R2 │ R3           │
 ├─────────────────────────────┤
-│ PC (Program Counter)        │
-│ ZF (Zero Flag)              │
+│ PC                          │
+│ ZF                          │
 │ Running Flag                │
 └─────────────────────────────┘
+             │
+             ▼
+      256 Memory Cells
 ```
 
 ---
 
-## Instruction Set
+# New Concept: Program Loading
 
-### LOAD
-
-```text
-0 REG VALUE
-```
+The CPU now loads programs from a file.
 
 Example:
 
 ```text
 0 0 5
-```
-
-Meaning:
-
-```text
-R0 = 5
-```
-
----
-
-### ADD
-
-```text
-1 DEST SRC1 SRC2 SRC3
-```
-
-Example:
-
-```text
+0 1 7
 1 3 0 1 2
-```
-
-Meaning:
-
-```text
-R3 = R3 + R0 + R1 + R2
-```
-
----
-
-### SUB
-
-```text
-3 DEST SRC1 SRC2 SRC3
-```
-
-Example:
-
-```text
-3 3 0 1 2
-```
-
-Meaning:
-
-```text
-R3 = R3 - R2 - R1 - R0
-```
-
----
-
-### CMP
-
-```text
-5 SRC1 SRC2
-```
-
-Example:
-
-```text
-5 0 1
-```
-
-Meaning:
-
-```text
-Compare R0 and R1
-
-If equal:
-    ZF = 1
-Else:
-    ZF = 0
-```
-
----
-
-### JZ
-
-```text
-6 ADDRESS
-```
-
-Example:
-
-```text
-6 29
-```
-
-Meaning:
-
-```text
-If ZF == 1
-    PC = ADDRESS
-```
-
----
-
-### JMP
-
-```text
-4 ADDRESS
-```
-
-Example:
-
-```text
-4 12
-```
-
-Meaning:
-
-```text
-PC = ADDRESS
-```
-
----
-
-### STORE
-
-Store a register value into memory.
-
-Format:
-
-```text
-7 SRC MEMORY_ADDRESS
-```
-
-Example:
-
-```text
-7 1 0
-```
-
-Meaning:
-
-```text
-MEMORY[0] = R1
-```
-
----
-
-### LOADM
-
-Load a value from memory into a register.
-
-Format:
-
-```text
-8 DEST MEMORY_ADDRESS
-```
-
-Example:
-
-```text
-8 2 0
-```
-
-Meaning:
-
-```text
-R2 = MEMORY[0]
-```
-
----
-
-### HALT
-
-```text
 2
 ```
 
-Meaning:
+This allows programs to be changed without recompiling the emulator.
+
+---
+
+# Execution Flow
 
 ```text
-Stop CPU execution
+User Input
+      │
+      ▼
+instructions.txt
+      │
+      ▼
+Program Array
+      │
+      ▼
+Fetch
+      │
+      ▼
+Decode
+      │
+      ▼
+Execute
 ```
 
 ---
 
-## Example Program
-
-```c
-int program[] = {
-    0, 0, 5,
-    0, 1, 7,
-    0, 2, 9,
-    0, 3, 0,
-
-    1, 3, 0, 1, 2,
-    3, 3, 0, 1, 2,
-
-    5, 0, 1,
-    6, 29,
-
-    7, 1, 0,
-    8, 2, 0,
-
-    4, 12,
-
-    2
-};
-```
-
----
-
-## Execution Cycle
-
-The emulator follows a classic CPU execution cycle:
+# Example Program
 
 ```text
-Fetch Instruction
-        │
-        ▼
-Decode Instruction
-        │
-        ▼
-Execute Instruction
-        │
-        ▼
-Update Program Counter
-        │
-        ▼
-Repeat
+0 0 5
+0 1 7
+0 2 9
+0 3 0
+
+1 3 0 1 2
+
+3 3 0 1 2
+
+5 0 1
+
+6 29
+
+7 1 0
+
+8 2 0
+
+4 12
+
+2
 ```
 
 ---
 
-## Building
+# Building
 
 Compile:
 
@@ -341,10 +171,14 @@ Run:
 
 ---
 
-## Sample Output
+# Example Output
 
 ```text
 CPU Created!
+
+How many instructions: 32
+
+Then, enter each instruction till < 32.
 
 R0     : 5
 R1     : 7
@@ -356,56 +190,61 @@ Running: 0
 
 ---
 
-## Learning Objectives
+# Learning Objectives
 
 This project is being built to learn:
 
 * Computer Architecture
-* CPU Design Fundamentals
+* CPU Design
+* Instruction Sets
 * Memory Systems
 * CPU Flags
-* Instruction Sets
 * Conditional Branching
-* Fetch-Decode-Execute Cycles
+* Program Loading
 * Emulator Development
 * Low-Level Programming in C
 
 ---
 
-## Version History
+# Version History
 
-### v1
+## v1
 
-* 2 Registers
 * LOAD
 * ADD
 * JMP
 * HALT
+* 2 Registers
 
-### v1.5
+## v1.5
 
 * 4 Registers
-* SUB Instruction
-* Improved Arithmetic Support
+* SUB instruction
 
-### v2
+## v2
 
 * Zero Flag
-* CMP Instruction
-* JZ Instruction
-* Conditional Branching
+* CMP
+* JZ
+* Conditional branching
 
-### v3
+## v3
 
-* 256 Memory Cells
-* STORE Instruction
-* LOADM Instruction
-* Register ↔ Memory Transfers
-* Basic RAM Support
+* 256 memory cells
+* STORE
+* LOADM
+* Memory architecture
+
+## v4
+
+* File-based program loading
+* User-entered instructions
+* instructions.txt support
+* External program execution
 
 ---
 
-## Author
+# Author
 
 Aryan
 

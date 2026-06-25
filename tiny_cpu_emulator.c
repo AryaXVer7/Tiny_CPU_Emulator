@@ -29,20 +29,44 @@ int main(){
 
     printf("CPU created!\n");
 
-    int program[] = {
-        0, 0, 5,
-        0, 1, 7,
-        0, 2, 9,
-        0, 3, 0,
-        1, 3, 0, 1, 2,
-        3, 3, 0, 1, 2,
-        5, 0, 1,
-        6, 29,
-        7, 1, 0,
-        8, 2, 0,
-        4, 12,
-        2
-    };
+    FILE *fptr;
+
+    fptr = fopen("instructions.txt", "w");
+
+    if (fptr == NULL){
+        printf("Cannot Open File.\n");
+        return 1;
+    }
+
+    int n;
+    printf("How many instructions: ");
+    scanf("%d", &n);
+
+    for (int i = 0 ; i < n; i++){
+        int value;
+
+        printf("Enter instruction no.%d: ", i);
+        scanf("%d", &value);
+
+        fprintf(fptr, "%d ", value);
+    }
+
+    fclose(fptr);
+
+    fptr = fopen("instructions.txt", "r");
+
+    if (fptr == NULL){
+        printf("Cannot Open File.\n");
+        return 1;
+    }
+
+    int program[100];
+    int i = 0;
+    while (fscanf(fptr, "%d", &program[i]) == 1){
+        i++;
+    }
+
+    fclose(fptr);
 
     int cycles = 0;
 
@@ -102,6 +126,8 @@ int main(){
             else{
                 cpu.zero_flag = 0;
             }
+
+            cpu.pc += 3;
         }
 
         else if (instruction == 6){
