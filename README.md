@@ -416,9 +416,3 @@ Interested in:
 * Compiler Design
 * Computer Architecture
 * Emulator Development
-
----
-
-## License
-
-MIT License
